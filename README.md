@@ -46,3 +46,48 @@ If you want to go further, you can:
 This software is licensed under the
 [New BSD License](http://creativecommons.org/licenses/BSD/). For more
 information, read [LICENSE](https://github.com/mozilla/pontoon/blob/master/LICENSE).
+
+
+# Custom stuff
+
+## Running the repo
+
+To get it running on docker follow these steps:
+  1. setup your ssh 
+    - use `ssh-keyscan -H HOST >> ssh/known_hosts` for known hosts
+    - add your keys
+    - setup `ssh_config`
+  2. create folder `data` (location of Postgres database)
+  3. configure ports in `docker-compose.yml` 
+    - currently 35146 for django server and 35147 for webpack (default is 8000 / 3000)
+    - I use it in combination with reverse proxy to resolve the ports
+  4. configure your environments in `~/docker/config/webapp.env`
+    - important are `SECRET_KEY` and `SITE_URL`
+    - see [mozilla docs](https://mozilla-pontoon.readthedocs.io/en/latest/admin/deployment.html#environment-variables) for reference (some keys don't work like sshkeys or sshconfig)
+  5. set your python version in `./.env` file 
+    - e.g. `PYTHON_VERSION=3.7.5`
+  6. use `docker-compose up` to build and start server
+
+## Combine it with reverse proxy
+
+Example nginx config
+```
+server {
+  listen 80;
+  listen [::]:80;
+
+  server_name pontoon.webpage.de;
+
+  location / {  # for django server
+    proxy_pass http://localhost:35146;
+  }
+
+  location /sockjs-node {  # for websocket connection
+    proxy_pass http://localhost:35147/sockjs-node;
+    proxy_http_version 1.1;
+
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "Upgrade";
+  }
+}
+```
