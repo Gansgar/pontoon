@@ -5,6 +5,7 @@ version: "2"
 services:
   # Webapp
   webapp:
+    restart: always
     build:
       context: .
       dockerfile: ./docker/Dockerfile
@@ -16,16 +17,18 @@ services:
     depends_on:
       - postgresql
     ports:
-      - "8000:8000"
-      - "3000:3000"
+      - "35146:8000"
+      - "35147:3000"
     volumes:
       - ./pontoon:/app/pontoon
       - ./frontend/src:/app/frontend/src
       - ./frontend/public:/app/frontend/public
       - ./tests:/app/tests
+      - ./ssh:/home/pontoon/.ssh
 
   # Database
   postgresql:
+    restart: always
     build:
       context: ./docker/postgres
       dockerfile: ./Dockerfile
@@ -34,3 +37,5 @@ services:
       - POSTGRES_USER=pontoon
       - POSTGRES_PASSWORD=asdf
       - POSTGRES_DB=pontoon
+    volumes:
+      - ./data:/var/lib/postgresql/data
