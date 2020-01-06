@@ -61,8 +61,8 @@ COPY --chown=pontoon:pontoon frontend/yarn.lock .
 RUN yarn install
 
 WORKDIR /app
-COPY ./docker/config/webapp.env .env
 COPY --chown=pontoon:pontoon . /app/
+COPY ./docker/config/webapp.env .env
 
 # Create the folder for front-end assets
 RUN mkdir -p assets
